@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro | Dashboard</title>
+    <link rel="stylesheet" href="todo.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-theme="light">
+
+    <div id="authScreen" class="auth-container">
+        <div class="auth-card">
+            <div class="logo-section" style="justify-content: center;">
+                <div class="logo-box"><i class="fas fa-tasks"></i></div>
+                <span class="logo-text">TaskMaster Pro</span>
+            </div>
+            <h2 id="authTitle" style="margin-top: 15px;">Welcome Back</h2>
+            <p id="authSubtitle" style="color: var(--text-muted); margin-bottom: 25px;">Enter your details to manage your day.</p>
+            
+            <form id="authForm">
+                <div class="input-group">
+                    <label style="text-align: left;">Username</label>
+                    <input type="text" id="authUsername" required placeholder="Enter username">
+                </div>
+                <div class="input-group">
+                    <label style="text-align: left;">Password</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••">
+                </div>
+                
+                <div id="recoverySection" style="display:none; margin-bottom: 15px;">
+                    <div class="input-group">
+                        <label style="text-align: left; color: var(--primary);">Set Secret Recovery Word</label>
+                        <input type="text" id="authSecret" placeholder="e.g., Bluebird">
+                    </div>
+                </div>
+
+                <button type="submit" id="authBtn" class="btn-submit">Sign In</button>
+            </form>
+            
+            <a href="javascript:void(0)" onclick="handleForgotPassword()" class="forgot-link">Forgot Password?</a>
+
+            <p class="auth-toggle">
+                <span id="toggleText">Don't have an account?</span> 
+                <a href="javascript:void(0)" id="toggleAuth" onclick="toggleAuthMode()">Sign Up</a>
+            </p>
+        </div>
+    </div>
+    
+    <div id="mainApp" class="dashboard-container" style="display: none;">
+        <aside id="sidebar" class="sidebar">
+            <div class="logo-section">
+                <div class="logo-box"><i class="fas fa-tasks"></i></div>
+                <span class="logo-text">TaskMaster</span>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="filterTasks('all', this)">
+                    <i class="fas fa-th-large"></i> <span>All Tasks</span>
+                </button>
+                <button class="nav-item" onclick="filterTasks('Personal', this)">
+                    <i class="fas fa-user"></i> <span>Personal</span>
+                </button>
+                <button class="nav-item" onclick="filterTasks('Work', this)">
+                    <i class="fas fa-briefcase"></i> <span>Work</span>
+                </button>
+                <button class="nav-item" onclick="filterTasks('Shopping', this)">
+                    <i class="fas fa-shopping-cart"></i> <span>Shopping</span>
+                </button>
+                <button class="nav-item" onclick="filterTasks('School', this)">
+                    <i class="fas fa-school"></i> <span>School</span>
+                </button>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0; opacity: 0.5;">
+
+                <button id="alertBtn" class="nav-item">
+                    <i class="fas fa-bell"></i> <span>Enable Alerts</span>
+                </button>
+                <button onclick="promptClearTasks()" class="nav-item" style="color: #ef4444;">
+                    <i class="fas fa-broom"></i> <span>Clear Done</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="controls">
+                    <button id="menuBtn" class="icon-btn"><i class="fas fa-bars"></i></button>
+                    <button id="themeToggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+                    <div class="user-meta" style="text-align: right;">
+                        <span id="welcomeUser" style="display: block; font-weight: 600;">Welcome!</span>
+                    </div>
+                    <button class="btn-primary" onclick="openModal()">
+                        <i class="fas fa-plus"></i> <span>New Task</span>
+                    </button>
+                </div>
+            </header>
+
+            <section class="visual-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info"><span>Total Tasks</span><strong id="stat-total">0</strong></div>
+                        <div class="stat-icon"><i class="fas fa-list-check"></i></div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-info"><span>Completed</span><strong id="stat-completed">0</strong></div>
+                        <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-info"><span>High Priority</span><strong id="stat-high">0</strong></div>
+                        <div class="stat-icon"><i class="fas fa-calendar-xmark"></i></div>
+                    </div>
+                </div>
+
+                <div class="analytics-row">
+                    <div class="analytics-card progress-box">
+                        <div class="progress-header">
+                            <h3>Goal Progress</h3>
+                            <span id="progress-text">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-fill" class="progress-bar-fill"></div>
+                        </div>
+                        <p id="motivation-quote">"Focus on being productive, not busy."</p>
+                    </div>
+                    <div class="analytics-card chart-box">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <div class="filter-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="taskSearch" placeholder="Search tasks...">
+                </div>
+                <div class="tabs">
+                    <button class="tab active" onclick="filterTasks('all', this)">All</button>
+                    <button class="tab" onclick="filterTasks('High', this)">High</button>
+                    <button class="tab" onclick="filterTasks('Medium', this)">Medium</button>
+                    <button class="tab" onclick="filterTasks('Low', this)">Low</button>
+                </div>
+            </div>
+
+            <div id="taskList"></div>
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                <h2>No tasks found</h2>
+            </div>
+        </main>
+    </div>
+
+    <div id="taskModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modalTitle">New Task</h2>
+            <form id="taskForm">
+                <div class="input-group"><label>Title</label><input type="text" id="taskTitle" required></div>
+                <div class="input-group"><label>Description</label><textarea id="taskDesc"></textarea></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Priority</label><select id="taskPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+                    <div class="input-group"><label>Category</label><select id="taskCategory"><option>Personal</option><option>Work</option><option>Shopping</option><option>School</option></select></div>
+                </div>
+                <div class="input-group"><label>Due Date</label><input type="date" id="taskDate"></div>
+                <button type="submit" class="btn-submit">Save Task</button>
+                <button type="button" onclick="closeModal()" class="btn-cancel" style="width:100%; margin-top:10px; background:none;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content confirm-card">
+            <h2>Are you sure?</h2>
+            <p id="confirmMessage">This cannot be undone.</p>
+            <div class="confirm-buttons">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button id="confirmBtn" class="btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- <button class="nav-item"> -->
+    <!-- <i class="fas fa-th-large"></i>  -->
+    <!-- <span>All Tasks</span> -->
+<!-- </button>    -->
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="todo.js"></script>
+</body>
+</html>
